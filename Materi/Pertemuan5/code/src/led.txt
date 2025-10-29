@@ -2,13 +2,9 @@
 
 // --- Konfigurasi ---
 // Tentukan pin untuk LED. 
-// LED 1 menggunakan GPIO 2 (LED internal)
-// LED 2 menggunakan GPIO 4
+// Kita akan gunakan LED internal (built-in) yang ada di board.
+// Pada kebanyakan board ESP32, ini adalah GPIO 2.
 const int ledPin = 2; 
-const int ledPin2 = 4;
-
-// Variable untuk mode berkedip bergantian
-bool modeKedip = false; 
 
 // --- Fungsi Setup ---
 // Fungsi ini hanya berjalan SATU KALI saat ESP32 pertama kali dinyalakan.
@@ -20,7 +16,6 @@ void setup() {
   // 2. Inisialisasi Pin LED
   // Mengatur pin LED sebagai OUTPUT.
   pinMode(ledPin, OUTPUT);
-  pinMode(ledPin2, OUTPUT);
 
   // 3. Beri jeda singkat
   // Ini untuk memberi waktu pada Serial Monitor untuk terhubung 
@@ -33,10 +28,8 @@ void setup() {
   Serial.println("Halo! ESP32 telah terhubung.");
   Serial.println("Sistem Kontrol LED via UART");
   Serial.println("---------------------------------");
-  Serial.println("Ketik '1' lalu Enter untuk menyalakan LED 1.");
-  Serial.println("Ketik '2' lalu Enter untuk menyalakan LED 2.");
-  Serial.println("Ketik '3' lalu Enter untuk LED berkedip bergantian.");
-  Serial.println("Ketik '0' lalu Enter untuk mematikan semua LED.");
+  Serial.println("Ketik '1' lalu Enter untuk menyalakan LED.");
+  Serial.println("Ketik '0' lalu Enter untuk mematikan LED.");
   Serial.println("Menunggu perintah...");
 }
 
@@ -56,44 +49,15 @@ void loop() {
     // 3. Proses perintah
     if (perintahMasuk == '1') {
       // Jika perintah adalah karakter '1'
-      modeKedip = false; // Matikan mode kedip
-      digitalWrite(ledPin, HIGH); // Nyalakan LED 1
-      digitalWrite(ledPin2, LOW);  // Matikan LED 2
-      Serial.println("Perintah diterima: [1] -> LED 1 NYALA");
+      digitalWrite(ledPin, HIGH); // Nyalakan LED
+      Serial.println("Perintah diterima: [1] -> LED NYALA");
     } 
-    else if (perintahMasuk == '2') {
-      // Jika perintah adalah karakter '2'
-      modeKedip = false; // Matikan mode kedip
-      digitalWrite(ledPin, LOW);   // Matikan LED 1
-      digitalWrite(ledPin2, HIGH); // Nyalakan LED 2
-      Serial.println("Perintah diterima: [2] -> LED 2 NYALA");
-    }
-    else if (perintahMasuk == '3') {
-      // Jika perintah adalah karakter '3'
-      modeKedip = true; // Aktifkan mode kedip bergantian
-      Serial.println("Perintah diterima: [3] -> LED BERKEDIP BERGANTIAN");
-    }
     else if (perintahMasuk == '0') {
       // Jika perintah adalah karakter '0'
-      modeKedip = false; // Matikan mode kedip
-      digitalWrite(ledPin, LOW);  // Matikan LED 1
-      digitalWrite(ledPin2, LOW); // Matikan LED 2
-      Serial.println("Perintah diterima: [0] -> SEMUA LED MATI");
+      digitalWrite(ledPin, LOW); // Matikan LED
+      Serial.println("Perintah diterima: [0] -> LED MATI");
     }
     // Karakter lain (seperti Enter, spasi, atau huruf) akan diabaikan
-  }
-
-  // 4. Jalankan mode kedip bergantian jika aktif
-  if (modeKedip) {
-    // LED 1 nyala, LED 2 mati
-    digitalWrite(ledPin, HIGH);
-    digitalWrite(ledPin2, LOW);
-    delay(500); // Tunggu 500ms
-    
-    // LED 1 mati, LED 2 nyala
-    digitalWrite(ledPin, LOW);
-    digitalWrite(ledPin2, HIGH);
-    delay(500); // Tunggu 500ms
   }
 
   // Jika tidak ada data serial, loop() akan berulang
