@@ -195,97 +195,32 @@ void loop() {
 }
 ```
 
------
+---
 
-### 4: Membaca Sensor Suhu & Kelembapan DHT11/DHT22
-
-#### Skema Rangkaian Elektronika
-
-Anda membutuhkan sensor (DHT11 atau DHT22) dan satu resistor *pull-up*.
-
-#### Penjelasan Rangkaian
-
-1.  **GND:** Hubungkan pin `GND` (atau -) pada sensor ke `GND` pada ESP32.
-2.  **VCC:** Hubungkan pin `VCC` (atau +) pada sensor ke `3V3` (3.3V) pada ESP32.
-3.  **DATA:** Hubungkan pin `DATA` (atau 'out') pada sensor ke pin **GPIO 4** pada ESP32 (bisa pin digital lain).
-4.  **Resistor Pull-up (PENTING):** Hubungkan sebuah resistor **4.7kΩ** atau **10kΩ** antara pin `VCC (3.3V)` dan pin `DATA`.
-    *(Catatan: Beberapa modul DHT yang dijual (yang memiliki 3 pin di papan PCB kecil) biasanya sudah menyertakan resistor ini, sehingga Anda tidak perlu menambahkannya lagi).*
-
-#### Persiapan PlatformIO (`platformio.ini`)
-
-Kita perlu *library* DHT dan *library* Adafruit Sensor sebagai dependensinya.
-
-1.  Buka file `platformio.ini` Anda.
-2.  Tambahkan baris-baris berikut:
-
-<!-- end list -->
-
-```ini
-[env:esp32dev]
-platform = espressif32
-board = esp32dev
-framework = arduino
-
-; Tambahkan baris ini untuk Serial Monitor
-monitor_speed = 115200
-
-; Tambahkan library untuk DHT
-lib_deps = 
-    adafruit/Adafruit Unified Sensor
-    adafruit/DHT sensor library
-```
-
-#### Kode Program (`src/main.cpp`)
-
-```cpp
-#include <Arduino.h>
-#include "DHT.h" // Library sensor DHT
-
-// --- Konfigurasi Sensor ---
-const int dhtPin = 4; // Tentukan pin DATA terhubung ke GPIO 4
-
-// Pilih tipe sensor: DHT11, DHT21, atau DHT22
-// const int dhtType = DHT11; 
-const int dhtType = DHT22; // DHT22 lebih akurat
-
-// Inisialisasi objek DHT
-DHT dht(dhtPin, dhtType);
-
-void setup() {
-  // Mulai komunikasi Serial untuk menampilkan data ke komputer
-  Serial.begin(115200); 
-  Serial.println("Tes Sensor DHT!");
-
-  // Mulai sensor DHT
-  dht.begin();
-}
-
-void loop() {
-  // Sensor DHT butuh jeda minimal 2 detik antar pembacaan
-  delay(2000);
-
-  // Membaca kelembapan
-  float humidity = dht.readHumidity();
-  
-  // Membaca suhu dalam Celcius (default)
-  float temp_c = dht.readTemperature();
-
-  // Membaca suhu dalam Fahrenheit
-  // float temp_f = dht.readTemperature(true);
-
-  // Cek jika pembacaan gagal (misal, sensor tidak terhubung)
-  if (isnan(humidity) || isnan(temp_c)) {
-    Serial.println("Gagal membaca data dari sensor DHT!");
-    return; // Keluar dari loop() lebih awal jika gagal
-  }
-
-  // Jika berhasil, cetak data ke Serial Monitor
-  Serial.print("Kelembapan: ");
-  Serial.print(humidity);
-  Serial.print(" %  |  ");
-  
-  Serial.print("Suhu: ");
-  Serial.print(temp_c);
-  Serial.println(" *C");
-}
-```
+#### **4. Troubleshooting I2C**
+**Masalah Umum dan Solusi:**
+1. **Sensor Tidak Terdeteksi**:
+   - Periksa alamat I2C dengan kode scanner:
+     ```cpp
+     #include <Wire.h>
+     void setup() {
+       Serial.begin(115200);
+       Wire.begin();
+     }
+     void loop() {
+       byte error, address;
+       for (address = 1; address < 127; address++) {
+         Wire.beginTransmission(address);
+         error = Wire.endTransmission();
+         if (error == 0) {
+           Serial.print("Device ditemukan di alamat 0x");
+           Serial.println(address, HEX);
+         }
+       }
+       delay(5000);
+     }
+     ```
+   - Pastikan kabel SDA/SCL terhubung dengan benar.
+2. **Data Tidak Valid**:
+   - Tambahkan resistor pull-up 4.7kΩ pada SDA dan SCL.
+   - Periksa sumber daya (pastikan sensor menggunakan 3.3V).
